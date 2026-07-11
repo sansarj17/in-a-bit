@@ -1,13 +1,13 @@
-package com.sansarj17.in_a_bit_backend_spring;
+package com.sansarj17.inabit;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class InABitBackendSpringApplication {
+public class InABitApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(InABitBackendSpringApplication.class, args);
+		SpringApplication.run(InABitApplication.class, args);
 	}
 
 }

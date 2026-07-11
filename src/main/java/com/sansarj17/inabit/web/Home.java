@@ -1,4 +1,4 @@
-package com.sansarj17.in_a_bit_backend_spring.web;
+package com.sansarj17.inabit.web;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;

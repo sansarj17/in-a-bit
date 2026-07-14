@@ -1,0 +1,14 @@
+# Root-level OS / editor cruft only.
+# Framework-specific ignores live in frontend/.gitignore and backend-spring/.gitignore.
+
+# macOS
+.DS_Store
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Logs
+*.log

@@ -1,5 +1,5 @@
 # Root-level OS / editor cruft only.
-# Framework-specific ignores live in frontend/.gitignore and backend-spring/.gitignore.
+# Framework-specific ignores live in frontend/.gitignore and backend-node/.gitignore.
 
 # macOS
 .DS_Store
@@ -12,3 +12,6 @@
 
 # Logs
 *.log
+
+# Local tool output
+.playwright-mcp/

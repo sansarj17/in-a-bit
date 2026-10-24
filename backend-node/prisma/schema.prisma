@@ -1,0 +1,15 @@
+// Prisma schema — https://pris.ly/d/prisma-schema
+// The database URL lives in prisma.config.ts (Prisma 7 no longer reads it from here).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  // The backend compiles to CommonJS, so the generated client must too.
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Models are added phase by phase (users in Phase 1, links in Phase 2).

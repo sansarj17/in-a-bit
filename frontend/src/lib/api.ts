@@ -1,16 +1,18 @@
-import wretch, { type WretchOptions } from "wretch";
+import wretch from "wretch";
 import QueryString from "wretch/addons/queryString";
 
-const wr = wretch().addon(QueryString);
+const REQUEST_TIMEOUT_MS = 30_000;
 
-export const api = () => {
-  wr._url = process.env.NEXT_PUBLIC_API_URL || "https://example.com"
+/**
+ * Base client for the in-a-bit API.
+ *
+ * Calls go to same-origin `/api/*`, which next.config.ts forwards to the Express backend,
+ * so the browser sends the auth cookie automatically. Wretch instances are immutable,
+ * so this base is safe to share.
+ *
+ * Browser-only: on the server (getServerSideProps) a relative URL has no host to resolve.
+ */
+const baseClient = wretch("/api").addon(QueryString);
 
-  const options: WretchOptions = {
-    // credentials: "include",
-    headers: {},
-    signal: AbortSignal.timeout(30e3),
-  };
-
-  return wr.options(options)
-};
+/** Returns the API client with a fresh timeout for each request. */
+export const api = () => baseClient.options({ signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });

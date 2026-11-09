@@ -12,4 +12,12 @@ datasource db {
   provider = "postgresql"
 }
 
-// Models are added phase by phase (users in Phase 1, links in Phase 2).
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}

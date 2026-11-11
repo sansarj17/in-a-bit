@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser"
 import express from "express"
 import { errorHandler } from "./middlewares/errorHandler"
 import { notFound } from "./middlewares/notFound"
@@ -11,8 +12,11 @@ export function createApp() {
 
     // No CORS middleware on purpose: browsers reach the API only through the Next.js
     // `/api/*` proxy (same origin), so other sites' pages can't read API responses.
+    // JSON bodies only. A plain HTML form on another site can't send JSON, and a cross-site
+    // `fetch` with a JSON body needs a CORS preflight we never allow, so forged requests fail.
     app.use(express.json({ limit: JSON_BODY_LIMIT }))
-    app.use(express.urlencoded({ extended: true, limit: JSON_BODY_LIMIT }))
+    // Reads the auth cookie into req.cookies.
+    app.use(cookieParser())
 
     // Routes
     app.use("/api", apiRouter)

@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
+/* Design tokens. Components use these through Tailwind classes (bg-surface, text-muted, ...). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --background: #f7f5f0;
+  --surface: #ffffff;
+  --foreground: #16140f;
+  --muted: #6b665c;
+  --border: #e3dfd5;
+  --accent: #e8590c;
+  --accent-foreground: #ffffff;
+  --danger: #c92a2a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #12110e;
+    --surface: #1b1a16;
+    --foreground: #f2efe8;
+    --muted: #a39d90;
+    --border: #2e2c26;
+    --accent: #ff7a33;
+    --accent-foreground: #16140f;
+    --danger: #ff6b6b;
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }

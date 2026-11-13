@@ -48,11 +48,12 @@ backend-node/src/
   config/env.ts       env vars validated with zod at startup
   lib/                logger, prisma client
   middlewares/        errorHandler, notFound, validate, requireAuth, rateLimit
+  types/              additions to Express types (req.userId)
   modules/
     auth/             routes · controller · service · schema
     links/            routes · controller · service · schema
     redirect/
-  utils/              AppError, shortCode
+  utils/              AppError, jwt, shortCode
 ```
 
 ## Data model
@@ -83,6 +84,12 @@ Responses: success → `{ success: true, data }`, error → `{ success: false, m
 - `requireAuth`: read cookie → `jwt.verify` (algorithm pinned to HS256) → `req.userId`.
 - Logout: clear the cookie.
 - Passwords capped at 72 bytes (bcrypt ignores anything longer).
+- Wrong email and wrong password get the same 401 message. An unknown email is still checked
+  against a dummy hash, so response times don't reveal which emails have accounts.
+- Duplicate email: the unique index rejects it (Prisma `P2002`) → 409. No "check first" query,
+  which could race when two sign-ups for the same email arrive at once.
+- CSRF: the cookie is `SameSite=Lax`, and the API only accepts JSON bodies, which other sites
+  can't send cross-origin without a CORS preflight we never allow.
 
 ## Design decisions
 
@@ -114,8 +121,6 @@ Tests get added in a separate pass once the features are built. Plan:
 
 ### Carried forward from the Phase 0 review
 
-- **Phase 1:** a `validate` middleware turns `ZodError` into `AppError(400, …, details)`; map
-  Prisma `P2002` (unique violation, e.g. duplicate email) to 409.
 - **Phase 3:** `app.set("trust proxy", …)` before rate limiting — behind Vercel's rewrite and
   the API host's proxy, `req.ip` is otherwise the proxy, so every user shares one limit.
 - **Phase 4:** the Dockerfile builds with dev dependencies (needs `prisma` + `typescript`),

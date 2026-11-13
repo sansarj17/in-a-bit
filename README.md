@@ -30,8 +30,9 @@ docker compose up -d
 
 # 2. Backend
 cd backend-node
-cp .env.example .env
+cp .env.example .env  # then set JWT_SECRET, e.g. to the output of: openssl rand -base64 48
 pnpm install          # also generates the Prisma client
+pnpm db:migrate       # creates the tables
 pnpm dev              # http://localhost:8080/api/health
 
 # 3. Frontend (new terminal)
@@ -54,7 +55,7 @@ pnpm dev              # http://localhost:3000
 ## Stack
 
 **Backend:** Express 5, TypeScript, Prisma 7 + PostgreSQL 17, zod, pino.
-Auth (Phase 1): bcryptjs, jsonwebtoken, cookie-parser.
+Auth: bcryptjs (password hashing), jsonwebtoken (login token in an httpOnly cookie), cookie-parser.
 
 **Frontend:** Next.js 16 (Pages Router), React 19, TanStack Query, wretch, Tailwind CSS 4.
 Deployed on Vercel.

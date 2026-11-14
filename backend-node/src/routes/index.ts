@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authRouter } from "../modules/auth/auth.routes";
+import { linksRouter } from "../modules/links/links.routes";
 import { healthRouter } from "./health.routes";
 
 /**
@@ -11,5 +12,6 @@ const apiRouter = Router()
 
 apiRouter.use(healthRouter)
 apiRouter.use("/auth", authRouter)
+apiRouter.use("/links", linksRouter)
 
 export { apiRouter }

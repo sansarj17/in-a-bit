@@ -1,11 +1,10 @@
 import bcrypt from "bcryptjs"
-import { Prisma } from "../../generated/prisma/client"
 import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
+import { isUniqueViolation } from "../../utils/prismaErrors"
 import type { LoginInput, RegisterInput } from "./auth.schema"
 
 const SALT_ROUNDS = 10
-const UNIQUE_CONSTRAINT_VIOLATION = "P2002"
 
 // Used when the email doesn't exist, so that case runs bcrypt too and takes as long as a
 // wrong password. Otherwise response times would reveal which emails have accounts.
@@ -32,10 +31,7 @@ export async function register(input: RegisterInput): Promise<PublicUser> {
     } catch (err) {
         // The unique index on email is the real guard: a "check first, then insert" could
         // still race when two sign-ups for the same email arrive at once.
-        if (
-            err instanceof Prisma.PrismaClientKnownRequestError &&
-            err.code === UNIQUE_CONSTRAINT_VIOLATION
-        ) {
+        if (isUniqueViolation(err)) {
             throw new AppError(409, "An account with this email already exists")
         }
         throw err

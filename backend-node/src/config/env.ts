@@ -14,6 +14,8 @@ const envSchema = z.object({
     DATABASE_URL: z.url(),
     // HS256 needs a long random key; a short one can be brute-forced offline from any token.
     JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
+    // Public URL of the frontend, where short links live. Used to stop links pointing back at us.
+    APP_URL: z.url(),
 })
 
 export interface Env {
@@ -23,6 +25,7 @@ export interface Env {
     readonly logLevel: (typeof LOG_LEVELS)[number]
     readonly databaseUrl: string
     readonly jwtSecret: string
+    readonly appUrl: string
 }
 
 /**
@@ -45,6 +48,7 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
         logLevel: vars.DEFAULT_LOG_LEVEL,
         databaseUrl: vars.DATABASE_URL,
         jwtSecret: vars.JWT_SECRET,
+        appUrl: vars.APP_URL,
     }
 }
 

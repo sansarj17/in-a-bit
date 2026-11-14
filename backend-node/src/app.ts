@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser"
 import express from "express"
 import { errorHandler } from "./middlewares/errorHandler"
 import { notFound } from "./middlewares/notFound"
+import { redirectRouter } from "./modules/redirect/redirect.routes"
 import { apiRouter } from "./routes"
 
 /** Request bodies here are tiny (a URL, an email), so anything bigger is rejected early. */
@@ -20,6 +21,8 @@ export function createApp() {
 
     // Routes
     app.use("/api", apiRouter)
+    // Short links: GET /:code. After /api, so API paths are never treated as codes.
+    app.use(redirectRouter)
 
     // 404 Handler
     app.use(notFound)

@@ -8,17 +8,19 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   hint?: string;
 }
 
-export function TextField({ label, name, error, hint, ...inputProps }: TextFieldProps) {
-  const messageId = `${name}-message`;
+export function TextField({ label, name, id, error, hint, ...inputProps }: TextFieldProps) {
+  // Defaults to the field name; pass `id` when the same form can appear more than once.
+  const inputId = id ?? name;
+  const messageId = `${inputId}-message`;
   const message = error ?? hint;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className="text-sm font-medium">
+      <label htmlFor={inputId} className="text-sm font-medium">
         {label}
       </label>
       <input
-        id={name}
+        id={inputId}
         name={name}
         aria-invalid={error ? true : undefined}
         aria-describedby={message ? messageId : undefined}

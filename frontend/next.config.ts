@@ -26,14 +26,28 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   async rewrites() {
-    return [
-      {
-        // Same-origin proxy: the browser talks only to the frontend's domain, so the
-        // backend's auth cookie is first-party and no CORS preflight is needed.
-        source: "/api/:path*",
-        destination: `${getBackendUrl()}/api/:path*`,
-      },
-    ];
+    const backendUrl = getBackendUrl();
+
+    return {
+      afterFiles: [
+        {
+          // Same-origin proxy: the browser talks only to the frontend's domain, so the
+          // backend's auth cookie is first-party and no CORS preflight is needed.
+          source: "/api/:path*",
+          destination: `${backendUrl}/api/:path*`,
+        },
+      ],
+      fallback: [
+        {
+          // Short links live on the frontend's domain (e.g. in-a-bit.app/x7Kp2Qa).
+          // `fallback` only runs after every page and static file has been checked, so
+          // /login, /dashboard, ... still work; anything else goes to the backend, which
+          // answers with the 302 redirect (or a "not found" page).
+          source: "/:code",
+          destination: `${backendUrl}/:code`,
+        },
+      ],
+    };
   },
 };
 

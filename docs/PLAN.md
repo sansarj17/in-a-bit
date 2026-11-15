@@ -34,12 +34,17 @@ can be explained in an interview. Nothing fancy for its own sake.
 
 ```
 Browser ──► Next.js (frontend, :3000)
-              │  rewrites /api/* → backend   (same origin → cookies just work, no CORS)
+              │  /api/*  → backend   (same origin → cookies just work, no CORS)
+              │  /:code  → backend   ("fallback" rewrite: only when no page matches)
               ▼
            Express (backend-node, :8080)
               ├── /api/*     JSON API
               └── /:code     302 redirect ──► Postgres
 ```
+
+Short links live on the frontend's domain (`in-a-bit.app/x7Kp2Qa`). Next.js checks its own
+pages first (`/login`, `/dashboard`, ...) and only forwards unknown paths to Express, which
+answers with the 302. Next passes the redirect straight through to the browser.
 
 Backend layout (by feature):
 
@@ -61,7 +66,7 @@ backend-node/src/
 | Table | Columns |
 |---|---|
 | `users` | id, email (unique), password_hash, name, created_at |
-| `links` | id, code (unique), original_url, user_id → users, title, expires_at, is_active, created_at, updated_at |
+| `links` | id, code (unique), original_url, user_id → users (cascade delete), title, expires_at, is_active, created_at, updated_at; index on (user_id, created_at desc) for the dashboard list |
 
 ## API
 
@@ -72,7 +77,7 @@ backend-node/src/
 | POST | `/api/auth/logout` | clears cookie |
 | GET | `/api/auth/me` | current user |
 | POST / GET | `/api/links` | create / list own links (paginated) |
-| GET / PATCH / DELETE | `/api/links/:id` | owner only |
+| GET / PATCH / DELETE | `/api/links/:id` | owner only; someone else's link is a 404 |
 | GET | `/:code` | 302 redirect; 404 unknown, 410 expired/inactive |
 
 Responses: success → `{ success: true, data }`, error → `{ success: false, message, details? }`.
@@ -96,8 +101,13 @@ Responses: success → `{ success: true, data }`, error → `{ success: false, m
 - **302, not 301** — browsers cache 301s, so edited/disabled links would keep going to the old URL.
 - **Random short codes** — 7 chars from base62 via `crypto.randomInt`, unique index, retry on
   collision. Sequential IDs would make every link guessable.
-- **URL safety** — only `http`/`https`; reject links to our own domain (loops); reserved
-  aliases (`api`, `login`, `dashboard`, …); rate-limited creation.
+- **URL safety** — only `http`/`https` with a real domain (blocks `javascript:` / `data:`
+  links); reject links to our own domain (loops); reserved aliases (`api`, `login`,
+  `dashboard`, …); rate-limited creation.
+- **Ownership in the query** — every link query filters by `id` *and* `userId`, so another
+  user's link is simply "not found". No separate permission check to forget.
+- **No caching of redirects** — `Cache-Control: no-store`, so edits and disables apply on the
+  very next visit.
 - **Login required** to create links, plus a demo account so recruiters can try it in one click.
 
 ## Phases

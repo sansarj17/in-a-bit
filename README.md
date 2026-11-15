@@ -42,6 +42,8 @@ pnpm install
 pnpm dev              # http://localhost:3000
 ```
 
+Short links are served from the frontend: `http://localhost:3000/<code>`.
+
 ## Backend scripts (`backend-node/`)
 
 | Command | What it does |

@@ -16,6 +16,9 @@ const envSchema = z.object({
     JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
     // Public URL of the frontend, where short links live. Used to stop links pointing back at us.
     APP_URL: z.url(),
+    // How many proxies sit in front of the API and add X-Forwarded-For (see .env.example).
+    // Needed to read the visitor's real IP for rate limiting; too high lets clients fake it.
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
 })
 
 export interface Env {
@@ -26,6 +29,7 @@ export interface Env {
     readonly databaseUrl: string
     readonly jwtSecret: string
     readonly appUrl: string
+    readonly trustProxyHops: number
 }
 
 /**
@@ -49,6 +53,7 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
         databaseUrl: vars.DATABASE_URL,
         jwtSecret: vars.JWT_SECRET,
         appUrl: vars.APP_URL,
+        trustProxyHops: vars.TRUST_PROXY_HOPS,
     }
 }
 

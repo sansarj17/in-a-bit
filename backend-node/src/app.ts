@@ -1,7 +1,10 @@
 import cookieParser from "cookie-parser"
 import express from "express"
+import helmet from "helmet"
+import { env } from "./config/env"
 import { errorHandler } from "./middlewares/errorHandler"
 import { notFound } from "./middlewares/notFound"
+import { apiLimiter } from "./middlewares/rateLimit"
 import { redirectRouter } from "./modules/redirect/redirect.routes"
 import { apiRouter } from "./routes"
 
@@ -10,6 +13,13 @@ const JSON_BODY_LIMIT = "10kb"
 
 export function createApp() {
     const app = express()
+
+    // Requests arrive through proxies (Next.js, the host's load balancer). Trusting exactly
+    // that many hops makes req.ip the visitor's IP, which the rate limiter keys on.
+    app.set("trust proxy", env.trustProxyHops)
+
+    // Security headers (nosniff, frame blocking, a strict CSP, ...) and no X-Powered-By.
+    app.use(helmet())
 
     // No CORS middleware on purpose: browsers reach the API only through the Next.js
     // `/api/*` proxy (same origin), so other sites' pages can't read API responses.
@@ -20,7 +30,7 @@ export function createApp() {
     app.use(cookieParser())
 
     // Routes
-    app.use("/api", apiRouter)
+    app.use("/api", apiLimiter, apiRouter)
     // Short links: GET /:code. After /api, so API paths are never treated as codes.
     app.use(redirectRouter)
 

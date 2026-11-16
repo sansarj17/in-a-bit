@@ -1,4 +1,5 @@
 import { Router } from "express"
+import { createLinkLimiter } from "../../middlewares/rateLimit"
 import { requireAuth } from "../../middlewares/requireAuth"
 import { validateBody } from "../../middlewares/validate"
 import * as linksController from "./links.controller"
@@ -9,7 +10,7 @@ export const linksRouter = Router()
 
 linksRouter.use(requireAuth)
 
-linksRouter.post("/", validateBody(createLinkSchema), linksController.create)
+linksRouter.post("/", createLinkLimiter, validateBody(createLinkSchema), linksController.create)
 linksRouter.get("/", linksController.list)
 linksRouter.get("/:id", linksController.getOne)
 linksRouter.patch("/:id", validateBody(updateLinkSchema), linksController.update)

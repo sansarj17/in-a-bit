@@ -14,7 +14,7 @@ redirectRouter.get("/:code", async (req: Request, res: Response) => {
     const link = CODE_PATTERN.test(code)
         ? await prisma.link.findUnique({
               where: { code },
-              select: { originalUrl: true, isActive: true },
+              select: { originalUrl: true, isActive: true, expiresAt: true },
           })
         : null
 
@@ -33,6 +33,13 @@ redirectRouter.get("/:code", async (req: Request, res: Response) => {
         // 410 Gone: the link existed but has been switched off on purpose.
         res.status(410).type("html").send(
             renderStatusPage("Link disabled", "The owner of this short link has turned it off."),
+        )
+        return
+    }
+
+    if (link.expiresAt && link.expiresAt.getTime() <= Date.now()) {
+        res.status(410).type("html").send(
+            renderStatusPage("Link expired", "This short link has expired and no longer works."),
         )
         return
     }

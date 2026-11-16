@@ -14,6 +14,7 @@ const linkFields = {
     originalUrl: true,
     title: true,
     isActive: true,
+    expiresAt: true,
     createdAt: true,
     updatedAt: true,
 } as const
@@ -24,6 +25,7 @@ export interface LinkDto {
     originalUrl: string
     title: string | null
     isActive: boolean
+    expiresAt: Date | null
     createdAt: Date
     updatedAt: Date
 }
@@ -35,18 +37,33 @@ export interface LinkPage {
 
 const linkNotFound = () => new AppError(404, "Link not found")
 
+function insertLink(userId: string, code: string, input: CreateLinkInput): Promise<LinkDto> {
+    return prisma.link.create({
+        data: {
+            code,
+            originalUrl: input.originalUrl,
+            title: input.title ?? null,
+            expiresAt: input.expiresAt ?? null,
+            userId,
+        },
+        select: linkFields,
+    })
+}
+
 export async function createLink(userId: string, input: CreateLinkInput): Promise<LinkDto> {
+    // A custom alias is used as the code itself; if someone has it already, say so.
+    if (input.alias) {
+        try {
+            return await insertLink(userId, input.alias, input)
+        } catch (err) {
+            if (isUniqueViolation(err)) throw new AppError(409, "That alias is already taken")
+            throw err
+        }
+    }
+
     for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt++) {
         try {
-            return await prisma.link.create({
-                data: {
-                    code: generateShortCode(),
-                    originalUrl: input.originalUrl,
-                    title: input.title ?? null,
-                    userId,
-                },
-                select: linkFields,
-            })
+            return await insertLink(userId, generateShortCode(), input)
         } catch (err) {
             // The unique index on `code` caught a collision: try again with a new code.
             if (isUniqueViolation(err)) continue

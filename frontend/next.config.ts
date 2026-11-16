@@ -22,8 +22,41 @@ function getBackendUrl(): string {
   return DEV_BACKEND_URL;
 }
 
+const isDev = process.env.NODE_ENV === "development";
+
+/**
+ * Content-Security-Policy: the browser only loads scripts, styles, fonts and API calls
+ * from our own origin, so even if someone injected HTML, it couldn't run outside code.
+ */
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' blob: data:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
+const SECURITY_HEADERS = [
+  { key: "Content-Security-Policy", value: CONTENT_SECURITY_POLICY },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+
+  async headers() {
+    // Production only: the dev server's hot reloading relies on eval and on files these
+    // headers would block. `next build && next start` is how to check them locally.
+    return isDev ? [] : [{ source: "/:path*", headers: SECURITY_HEADERS }];
+  },
 
   async rewrites() {
     const backendUrl = getBackendUrl();

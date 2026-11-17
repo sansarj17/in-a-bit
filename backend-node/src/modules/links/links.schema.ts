@@ -5,6 +5,8 @@ const MAX_URL_LENGTH = 2048
 const MAX_TITLE_LENGTH = 100
 const DEFAULT_PAGE_SIZE = 10
 const MAX_PAGE_SIZE = 50
+// Far beyond any real list; just keeps absurd ?page= values from reaching the database.
+const MAX_PAGE = 10_000
 
 // Custom aliases share the URL space with the app's own pages, so these can't be used.
 const RESERVED_ALIASES = new Set([
@@ -39,6 +41,9 @@ const originalUrlField = z
     // A short link pointing at another short link could loop forever.
     // (zod still runs this check when the URL check above failed, so it must not throw.)
     .refine((url) => getHostname(url) !== appHostname, "Links to in-a-bit itself aren't allowed")
+    // Store the browser's reading of the URL, e.g. "https:example.com" → "https://example.com/",
+    // so the redirect goes exactly where validation said it would.
+    .transform((url) => new URL(url).href)
 
 // Forms send "" for fields left blank; treat that as "not provided".
 const blankToUndefined = (value: unknown) =>
@@ -81,7 +86,7 @@ export const updateLinkSchema = z
     .refine((changes) => Object.keys(changes).length > 0, "Nothing to update")
 
 export const listLinksQuerySchema = z.object({
-    page: z.coerce.number().int().min(1).default(1),
+    page: z.coerce.number().int().min(1).max(MAX_PAGE).default(1),
     limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(DEFAULT_PAGE_SIZE),
 })
 

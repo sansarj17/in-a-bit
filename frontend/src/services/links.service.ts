@@ -5,12 +5,18 @@ import { api } from "@/lib/api";
 export interface ICreateLinkInput {
   originalUrl: string;
   title?: string;
+  /** Custom short code, e.g. "my-cv". A random one is generated when left out. */
+  alias?: string;
+  /** ISO date-time. */
+  expiresAt?: string;
 }
 
 export interface IUpdateLinkInput {
   originalUrl?: string;
   title?: string;
   isActive?: boolean;
+  /** ISO date-time, or null to remove the expiry. */
+  expiresAt?: string | null;
 }
 
 type LinkResponse = IApiSuccess<{ link: ILink }>;

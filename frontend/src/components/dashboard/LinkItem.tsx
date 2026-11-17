@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDeleteLink, useUpdateLink } from "@/hooks/useLinks";
 import type { ILink } from "@/interfaces";
 import { getErrorMessage } from "@/utils/apiError";
-import { formatDate, getDisplayShortUrl, getShortUrl } from "@/utils/links";
+import { formatDate, formatDateTime, getDisplayShortUrl, getShortUrl, isExpired } from "@/utils/links";
 import { Button } from "../Button";
 import { CopyButton } from "../CopyButton";
 import { FormError } from "../FormError";
@@ -19,6 +19,8 @@ export function LinkItem({ link }: LinkItemProps) {
   const deleteLink = useDeleteLink();
 
   const actionError = toggleActive.error ?? deleteLink.error;
+  const hasExpired = isExpired(link);
+  const isWorking = link.isActive && !hasExpired;
 
   function handleDelete() {
     const confirmed = window.confirm(
@@ -40,22 +42,23 @@ export function LinkItem({ link }: LinkItemProps) {
                 target="_blank"
                 rel="noreferrer"
                 className={`font-mono font-semibold underline-offset-4 hover:underline ${
-                  link.isActive ? "text-accent" : "text-muted line-through"
+                  isWorking ? "text-accent" : "text-muted line-through"
                 }`}
               >
                 {getDisplayShortUrl(link.code)}
               </a>
-              {!link.isActive && (
-                <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs font-medium text-muted">
-                  Disabled
-                </span>
-              )}
+              {!link.isActive && <StatusBadge label="Disabled" />}
+              {hasExpired && <StatusBadge label="Expired" />}
             </div>
             {link.title && <p className="mt-1 font-medium">{link.title}</p>}
             <p className="mt-1 truncate text-sm text-muted" title={link.originalUrl}>
               → {link.originalUrl}
             </p>
-            <p className="mt-2 text-xs text-muted">Created {formatDate(link.createdAt)}</p>
+            <p className="mt-2 text-xs text-muted">
+              Created {formatDate(link.createdAt)}
+              {link.expiresAt && !hasExpired && <> · Expires {formatDateTime(link.expiresAt)}</>}
+              {link.expiresAt && hasExpired && <> · Expired {formatDateTime(link.expiresAt)}</>}
+            </p>
           </div>
 
           <div className="flex shrink-0 flex-wrap items-center gap-1">
@@ -83,5 +86,13 @@ export function LinkItem({ link }: LinkItemProps) {
         </div>
       )}
     </li>
+  );
+}
+
+function StatusBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs font-medium text-muted">
+      {label}
+    </span>
   );
 }

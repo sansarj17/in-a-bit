@@ -26,6 +26,8 @@ export interface ILink {
   originalUrl: string;
   title: string | null;
   isActive: boolean;
+  /** ISO date after which the link stops working, or null for never. */
+  expiresAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

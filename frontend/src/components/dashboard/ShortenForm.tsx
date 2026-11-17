@@ -1,7 +1,7 @@
 import { useRef, type FormEvent } from "react";
 import { useCreateLink } from "@/hooks/useLinks";
 import { getErrorMessage, getFieldErrors } from "@/utils/apiError";
-import { getDisplayShortUrl, getShortUrl } from "@/utils/links";
+import { fromDateTimeLocalValue, getDisplayShortUrl, getShortUrl } from "@/utils/links";
 import { Button } from "../Button";
 import { CopyButton } from "../CopyButton";
 import { FormError } from "../FormError";
@@ -24,6 +24,8 @@ export function ShortenForm() {
       {
         originalUrl: String(form.get("originalUrl") ?? ""),
         title: String(form.get("title") ?? ""),
+        alias: String(form.get("alias") ?? ""),
+        expiresAt: fromDateTimeLocalValue(String(form.get("expiresAt") ?? "")) ?? undefined,
       },
       { onSuccess: () => formRef.current?.reset() },
     );
@@ -56,6 +58,33 @@ export function ShortenForm() {
             Shorten
           </Button>
         </div>
+
+        {/* Optional extras stay folded away; open automatically if one of them has an error. */}
+        <details
+          open={Boolean(fieldErrors.alias || fieldErrors.expiresAt) || undefined}
+          className="group rounded-lg border border-border px-4 py-3"
+        >
+          <summary className="cursor-pointer text-sm font-medium text-muted select-none hover:text-foreground">
+            Custom alias &amp; expiry
+          </summary>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <TextField
+              label="Custom alias"
+              name="alias"
+              placeholder="my-portfolio"
+              maxLength={32}
+              hint="Letters, numbers, - or _. Leave empty for a random code."
+              error={fieldErrors.alias}
+            />
+            <TextField
+              label="Expires at"
+              name="expiresAt"
+              type="datetime-local"
+              hint="After this the link stops working."
+              error={fieldErrors.expiresAt}
+            />
+          </div>
+        </details>
       </form>
 
       {createdLink && (

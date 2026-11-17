@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import { useUpdateLink } from "@/hooks/useLinks";
 import type { ILink } from "@/interfaces";
 import { getErrorMessage, getFieldErrors } from "@/utils/apiError";
+import { fromDateTimeLocalValue, toDateTimeLocalValue } from "@/utils/links";
 import { Button } from "../Button";
 import { FormError } from "../FormError";
 import { TextField } from "../TextField";
@@ -28,6 +29,8 @@ export function EditLinkForm({ link, onDone }: EditLinkFormProps) {
         changes: {
           originalUrl: String(form.get("originalUrl") ?? ""),
           title: String(form.get("title") ?? ""),
+          // Clearing the field removes the expiry.
+          expiresAt: fromDateTimeLocalValue(String(form.get("expiresAt") ?? "")),
         },
       },
       { onSuccess: onDone },
@@ -53,6 +56,15 @@ export function EditLinkForm({ link, onDone }: EditLinkFormProps) {
         defaultValue={link.title ?? ""}
         maxLength={100}
         error={fieldErrors.title}
+      />
+      <TextField
+        id={`edit-${link.id}-expires`}
+        label="Expires at"
+        name="expiresAt"
+        type="datetime-local"
+        defaultValue={toDateTimeLocalValue(link.expiresAt)}
+        hint="Leave empty to keep the link working forever."
+        error={fieldErrors.expiresAt}
       />
       <div className="flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onDone}>

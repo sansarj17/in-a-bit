@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { buttonStyles, FormError, Logo } from "@/components";
+import { buttonStyles, DemoButton, FormError, Logo } from "@/components";
 import { useMe } from "@/hooks/useAuth";
 import { useRedirectIfLoggedIn } from "@/hooks/useRedirectIfLoggedIn";
 import { getErrorMessage } from "@/utils/apiError";
@@ -34,14 +34,15 @@ export default function HomePage() {
               Paste a long URL and get a short link you can share anywhere. Edit where it
               points, or switch it off, at any time.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap items-start gap-3">
               <Link href="/register" className={buttonStyles("primary")}>
                 Create an account
               </Link>
-              <Link href="/login" className={buttonStyles("secondary")}>
-                Log in
-              </Link>
+              <DemoButton />
             </div>
+            <p className="mt-3 text-sm text-muted">
+              The demo gives you your own throwaway account with a few sample links.
+            </p>
 
             <figure className="mt-14 rounded-2xl border border-border bg-surface p-5 font-mono text-sm">
               <p className="truncate text-muted">

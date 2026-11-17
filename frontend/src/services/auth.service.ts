@@ -39,6 +39,12 @@ export async function register(input: IRegisterInput): Promise<IUser> {
   return response.data.user;
 }
 
+/** Logs in to a brand-new throwaway account that comes with a few sample links. */
+export async function loginAsDemo(): Promise<IUser> {
+  const response = await api().post(undefined, "/auth/demo").json<UserResponse>();
+  return response.data.user;
+}
+
 export async function logout(): Promise<void> {
   await api().post(undefined, "/auth/logout").res();
 }

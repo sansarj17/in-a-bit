@@ -3,6 +3,8 @@ export interface IUser {
   id: string;
   email: string;
   name: string;
+  /** Throwaway account from the "Try the demo" button. */
+  isDemo: boolean;
   createdAt: string;
 }
 

@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { AppHeader } from "@/components";
+import { DemoBanner } from "@/components/dashboard/DemoBanner";
 import { LinkList } from "@/components/dashboard/LinkList";
 import { ShortenForm } from "@/components/dashboard/ShortenForm";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -37,6 +38,7 @@ export default function DashboardPage() {
         <div className="mx-auto max-w-3xl px-6 pb-24">
           <AppHeader user={user} />
           <main className="flex flex-col gap-10">
+            {user.isDemo && <DemoBanner />}
             <ShortenForm />
             <LinkList page={page} onPageChange={handlePageChange} />
           </main>

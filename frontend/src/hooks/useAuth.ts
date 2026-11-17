@@ -9,6 +9,7 @@ import type { IUser } from "@/interfaces";
 import {
   getMe,
   login,
+  loginAsDemo,
   logout,
   register,
   type ILoginInput,
@@ -37,6 +38,14 @@ export function useRegister(): UseMutationResult<IUser, Error, IRegisterInput> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: register,
+    onSuccess: (user) => queryClient.setQueryData(ME_QUERY_KEY, user),
+  });
+}
+
+export function useDemoLogin(): UseMutationResult<IUser, Error, void> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: loginAsDemo,
     onSuccess: (user) => queryClient.setQueryData(ME_QUERY_KEY, user),
   });
 }

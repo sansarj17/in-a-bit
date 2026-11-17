@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import type { FormEvent } from "react";
-import { AuthCard, Button, FormError, TextField } from "@/components";
+import { AuthCard, Button, DemoButton, FormError, TextField } from "@/components";
 import { useLogin } from "@/hooks/useAuth";
 import { useRedirectIfLoggedIn } from "@/hooks/useRedirectIfLoggedIn";
 import { getErrorMessage, getFieldErrors } from "@/utils/apiError";
@@ -63,6 +63,12 @@ export default function LoginPage() {
             Log in
           </Button>
         </form>
+        <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-widest text-muted">
+          <span className="h-px flex-1 bg-border" />
+          or
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <DemoButton />
       </AuthCard>
     </>
   );

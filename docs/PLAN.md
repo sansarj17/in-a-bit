@@ -110,6 +110,31 @@ Responses: success → `{ success: true, data }`, error → `{ success: false, m
   very next visit.
 - **Login required** to create links, plus a demo account so recruiters can try it in one click.
 
+## Security and abuse limits
+
+| What | Where | Why |
+|---|---|---|
+| Rate limit: 300 req / 15 min per IP | all of `/api` | ceiling against scripts |
+| Rate limit: 20 / 15 min per IP | login, register | slows password guessing |
+| Rate limit: 10 / hour per IP | demo accounts | each click creates an account |
+| Rate limit: 50 / hour per user | creating links | stops one account flooding the DB |
+| `trust proxy` = `TRUST_PROXY_HOPS` | Express | behind Next/Vercel and the host's load balancer, `req.ip` would otherwise be the proxy, so everyone would share one limit. Too high a number lets clients fake their IP. |
+| helmet | Express | security headers on API responses and redirect pages |
+| CSP + nosniff + frame blocking | Next.js (production builds) | scripts only from our origin; can't be framed (clickjacking) |
+
+Rate limits are kept in memory, so they reset on restart and aren't shared between server
+instances. That's fine for one instance; with several, the store would move to Redis.
+
+**Custom aliases** use the same `code` column as random codes. Aliases that would clash with
+app routes (`login`, `dashboard`, `api`, …) are reserved; a taken alias is a 409.
+
+**Expiry** is a nullable `expires_at`; after it, `GET /:code` answers 410 "Link expired".
+
+**Demo accounts** — "Try the demo" creates a fresh throwaway user (`is_demo`, an
+`@demo.invalid` email, a random password nobody knows) with three sample links (active,
+expiring, disabled). Each visitor gets their own, so nobody sees anyone else's links.
+Clean-up would be one scheduled query: delete demo users older than a day (links cascade).
+
 ## Phases
 
 | # | Phase | Backend | Frontend |
@@ -131,12 +156,14 @@ Tests get added in a separate pass once the features are built. Plan:
 
 ### Carried forward from the Phase 0 review
 
-- **Phase 3:** `app.set("trust proxy", …)` before rate limiting — behind Vercel's rewrite and
-  the API host's proxy, `req.ip` is otherwise the proxy, so every user shares one limit.
 - **Phase 4:** the Dockerfile builds with dev dependencies (needs `prisma` + `typescript`),
   then copies `dist/` into a slim runtime image.
 
 ## "How would you scale it?" (interview answers, not built)
+
+- Move rate-limit counters to Redis so several API instances share them.
+- Abuse: public shorteners get used for phishing. Real ones check URLs against Google Safe
+  Browsing and require verified emails before links go live.
 
 - Cache `code → url` in Redis in front of Postgres (reads vastly outnumber writes).
 - Record clicks asynchronously via a queue for analytics.

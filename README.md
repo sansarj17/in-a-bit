@@ -2,6 +2,12 @@
 
 A URL shortener: sign in, paste a long URL, get a short link that redirects to it.
 
+- Short links with random codes or a custom alias (`/my-cv`), optional expiry date
+- Edit where a link points, switch it off, or delete it
+- One-click demo account with sample links, no sign-up needed
+- Accounts with hashed passwords and an httpOnly JWT cookie
+- Rate limits, security headers and URL checks (http/https only, no links back to itself)
+
 ```
 in-a-bit/
 ├── backend-node/      # Express 5 + TypeScript API (Prisma, PostgreSQL)

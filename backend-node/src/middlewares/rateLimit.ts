@@ -26,6 +26,13 @@ export const authLimiter = limiter({
     message: "Too many attempts. Please wait a few minutes and try again.",
 })
 
+/** Demo accounts, per IP: each click creates an account, so keep it to a handful an hour. */
+export const demoLimiter = limiter({
+    windowMs: 60 * MINUTE_MS,
+    limit: 10,
+    message: "Too many demo accounts from your network. Please try again later.",
+})
+
 /** Creating links, per user (runs after requireAuth): stops one account flooding the database. */
 export const createLinkLimiter = limiter({
     windowMs: 60 * MINUTE_MS,

@@ -4,19 +4,26 @@ import { AppError } from "../../utils/AppError"
 import { isUniqueViolation } from "../../utils/prismaErrors"
 import type { LoginInput, RegisterInput } from "./auth.schema"
 
-const SALT_ROUNDS = 10
+export const SALT_ROUNDS = 10
 
 // Used when the email doesn't exist, so that case runs bcrypt too and takes as long as a
 // wrong password. Otherwise response times would reveal which emails have accounts.
 const DUMMY_PASSWORD_HASH = bcrypt.hashSync("not-a-real-password", SALT_ROUNDS)
 
 /** The user fields that are safe to send to the browser (never the password hash). */
-const publicUserFields = { id: true, email: true, name: true, createdAt: true } as const
+export const publicUserFields = {
+    id: true,
+    email: true,
+    name: true,
+    isDemo: true,
+    createdAt: true,
+} as const
 
 export interface PublicUser {
     id: string
     email: string
     name: string
+    isDemo: boolean
     createdAt: Date
 }
 
@@ -50,7 +57,13 @@ export async function login(input: LoginInput): Promise<PublicUser> {
         throw new AppError(401, "Invalid email or password")
     }
 
-    return { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt }
+    return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isDemo: user.isDemo,
+        createdAt: user.createdAt,
+    }
 }
 
 export async function getUserById(userId: string): Promise<PublicUser> {

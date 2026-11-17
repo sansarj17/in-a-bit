@@ -2,6 +2,7 @@ import type { Request, Response } from "express"
 import { clearAuthCookie, setAuthCookie } from "./auth.cookie"
 import type { LoginInput, RegisterInput } from "./auth.schema"
 import * as authService from "./auth.service"
+import { createDemoUser } from "./demo.service"
 
 // Bodies have already been checked by validateBody, so they match the schema types here.
 
@@ -15,6 +16,12 @@ export async function login(req: Request, res: Response): Promise<void> {
     const user = await authService.login(req.body as LoginInput)
     setAuthCookie(res, user.id)
     res.json({ success: true, data: { user } })
+}
+
+export async function demo(_req: Request, res: Response): Promise<void> {
+    const user = await createDemoUser()
+    setAuthCookie(res, user.id)
+    res.status(201).json({ success: true, data: { user } })
 }
 
 export function logout(_req: Request, res: Response): void {

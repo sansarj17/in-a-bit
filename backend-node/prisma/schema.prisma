@@ -2,10 +2,13 @@
 // The database URL lives in prisma.config.ts (Prisma 7 no longer reads it from here).
 
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
   // The backend compiles to CommonJS, so the generated client must too.
-  moduleFormat = "cjs"
+  moduleFormat        = "cjs"
+  // Imports inside the client end in .js (what tsc outputs). Set explicitly: otherwise
+  // Prisma guesses from tsconfig.json, and the Docker build generates before copying it.
+  importFileExtension = "js"
 }
 
 datasource db {

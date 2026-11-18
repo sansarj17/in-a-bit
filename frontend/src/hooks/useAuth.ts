@@ -50,14 +50,14 @@ export function useDemoLogin(): UseMutationResult<IUser, Error, void> {
   });
 }
 
-export function useLogout(): UseMutationResult<void, Error, void> {
-  const queryClient = useQueryClient();
+/**
+ * Logs out, then loads `redirectTo` as a fresh page. A full page load throws away
+ * everything in memory (cached links, the user), so nothing from this session can leak
+ * to the next person on the browser, and no page is left showing stale data.
+ */
+export function useLogout(redirectTo = "/"): UseMutationResult<void, Error, void> {
   return useMutation({
     mutationFn: logout,
-    onSuccess: () => {
-      // Drop everything cached for this user, so the next person on this browser sees none of it.
-      queryClient.clear();
-      queryClient.setQueryData(ME_QUERY_KEY, null);
-    },
+    onSuccess: () => window.location.assign(redirectTo),
   });
 }

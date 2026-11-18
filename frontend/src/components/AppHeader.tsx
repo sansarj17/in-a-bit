@@ -15,6 +15,11 @@ export function AppHeader({ user }: AppHeaderProps) {
     <header className="flex h-20 items-center justify-between gap-4">
       <Logo />
       <div className="flex items-center gap-3">
+        {logout.error && (
+          <span role="alert" className="text-sm text-danger">
+            Couldn&apos;t log out. Try again.
+          </span>
+        )}
         <span className="hidden text-sm text-muted sm:inline">{user.name}</span>
         <Button
           variant="secondary"

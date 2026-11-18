@@ -15,3 +15,6 @@
 
 # Local tool output
 .playwright-mcp/
+
+# Private notes that stay on this machine (never pushed)
+docs/local-only/

@@ -143,7 +143,7 @@ Clean-up would be one scheduled query: delete demo users older than a day (links
 | 1 | Accounts | `users` table, register / login / logout / me, `requireAuth` | Login + register pages |
 | 2 | Links | `links` table, CRUD, `GET /:code` redirect | Dashboard: shorten, list, copy, edit, delete |
 | 3 | Polish | Rate limits, helmet, custom aliases, expiry, demo account | Demo button, alias / expiry inputs |
-| 4 | Ship | Dockerfile, GitHub Actions CI, deploy | Deploy, README with screenshots |
+| 4 | Ship | Dockerfile, GitHub Actions CI, deploy guide | Deploy guide, README with screenshots |
 
 ### Testing (later)
 
@@ -153,11 +153,6 @@ Tests get added in a separate pass once the features are built. Plan:
 - A separate `in_a_bit_test` database, migrated with `prisma migrate deploy` before the run.
 - Vitest `fileParallelism: false` so test files don't race on the shared test database.
 - Aim for 80%+ coverage.
-
-### Carried forward from the Phase 0 review
-
-- **Phase 4:** the Dockerfile builds with dev dependencies (needs `prisma` + `typescript`),
-  then copies `dist/` into a slim runtime image.
 
 ## "How would you scale it?" (interview answers, not built)
 

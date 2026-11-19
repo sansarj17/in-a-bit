@@ -22,6 +22,19 @@ function getBackendUrl(): string {
   return DEV_BACKEND_URL;
 }
 
+/**
+ * src/proxy.ts sends PROXY_SECRET to the API with every forwarded request, and the API
+ * rejects requests without it. Fail a production build that lacks it, rather than ship a
+ * site whose every API call is refused.
+ */
+function assertProxySecret(): void {
+  if (process.env.NODE_ENV === "production" && !process.env.PROXY_SECRET) {
+    throw new Error("PROXY_SECRET must be set for production builds (same value as the API's).");
+  }
+}
+
+assertProxySecret();
+
 const isDev = process.env.NODE_ENV === "development";
 
 /**

@@ -60,5 +60,6 @@ jobs:
       - run: pnpm lint
       - run: pnpm build # also type-checks
         env:
-          # Production builds require it; any URL works for a build that isn't deployed.
+          # Production builds require both; placeholders are fine for a build that isn't deployed.
           BACKEND_URL: https://api.example.com
+          PROXY_SECRET: ci-placeholder-not-a-real-secret-0123456789

@@ -25,6 +25,7 @@ in-a-bit/
 ├── .github/workflows/   # CI: typecheck, lint, build, Docker image
 └── docs/
     ├── PLAN.md          # Scope, architecture, design decisions
+    ├── API-ORIGIN-LOCK.md # Why only the frontend can call the API, and how
     └── screenshots/
 ```
 
@@ -88,10 +89,13 @@ Security: helmet, express-rate-limit.
 
 ## Deployment
 
-- **Frontend:** Vercel, root directory `frontend`, with `BACKEND_URL` set to the API's URL.
+- **Frontend:** Vercel, root directory `frontend`, with `BACKEND_URL` set to the API's URL and
+  `PROXY_SECRET`.
 - **API:** any host that runs a Docker image (`backend-node/Dockerfile`), with `DATABASE_URL`,
-  `JWT_SECRET`, `APP_URL` (the frontend's URL) and `TRUST_PROXY_HOPS`. The container applies
-  pending migrations when it starts.
+  `JWT_SECRET`, `APP_URL` (the frontend's URL), `TRUST_PROXY_HOPS` and `PROXY_SECRET`. The
+  container applies pending migrations when it starts.
+- `PROXY_SECRET` has the same value on both: the API only answers requests that came through
+  the frontend ([docs/API-ORIGIN-LOCK.md](docs/API-ORIGIN-LOCK.md)).
 - **Database:** any PostgreSQL.
 
 ## Design

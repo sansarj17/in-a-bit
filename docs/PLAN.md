@@ -118,7 +118,8 @@ Responses: success → `{ success: true, data }`, error → `{ success: false, m
 | Rate limit: 20 / 15 min per IP | login, register | slows password guessing |
 | Rate limit: 10 / hour per IP | demo accounts | each click creates an account |
 | Rate limit: 50 / hour per user | creating links | stops one account flooding the DB |
-| `trust proxy` = `TRUST_PROXY_HOPS` | Express | behind Next/Vercel and the host's load balancer, `req.ip` would otherwise be the proxy, so everyone would share one limit. Too high a number lets clients fake their IP. |
+| Origin lock (`PROXY_SECRET`) | Next.js proxy + Express | the API only answers requests carrying a secret the frontend adds; IP rate limits use the visitor IP the frontend reports, which can't be forged. See [API-ORIGIN-LOCK.md](API-ORIGIN-LOCK.md) |
+| `trust proxy` = `TRUST_PROXY_HOPS` | Express | fallback IP when the lock is off (local development): behind proxies, `req.ip` would otherwise be the proxy |
 | helmet | Express | security headers on API responses and redirect pages |
 | CSP + nosniff + frame blocking | Next.js (production builds) | scripts only from our origin; can't be framed (clickjacking) |
 

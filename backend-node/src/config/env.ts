@@ -19,6 +19,13 @@ const envSchema = z.object({
     // How many proxies sit in front of the API and add X-Forwarded-For (see .env.example).
     // Needed to read the visitor's real IP for rate limiting; too high lets clients fake it.
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
+    // Shared with the frontend's proxy: only requests carrying it are accepted (origin lock).
+    // Optional locally; required in production (checked in parseEnv below).
+    // An empty value (as in .env.example) counts as "not set".
+    PROXY_SECRET: z.preprocess(
+        (value) => (value === "" ? undefined : value),
+        z.string().min(32, "PROXY_SECRET must be at least 32 characters").optional(),
+    ),
 })
 
 export interface Env {
@@ -30,6 +37,8 @@ export interface Env {
     readonly jwtSecret: string
     readonly appUrl: string
     readonly trustProxyHops: number
+    /** Undefined means the origin lock is off (local development only). */
+    readonly proxySecret: string | undefined
 }
 
 /**
@@ -45,6 +54,11 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
 
     const vars = result.data
 
+    // Without it in production, anyone could call the API directly and bypass the frontend.
+    if (vars.NODE_ENV === "production" && !vars.PROXY_SECRET) {
+        throw new Error("Invalid environment variables:\nPROXY_SECRET is required in production")
+    }
+
     return {
         nodeEnv: vars.NODE_ENV,
         isProduction: vars.NODE_ENV === "production",
@@ -54,6 +68,7 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
         jwtSecret: vars.JWT_SECRET,
         appUrl: vars.APP_URL,
         trustProxyHops: vars.TRUST_PROXY_HOPS,
+        proxySecret: vars.PROXY_SECRET,
     }
 }
 

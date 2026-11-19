@@ -1,12 +1,23 @@
-import { rateLimit, type Options } from "express-rate-limit"
+import type { Request } from "express"
+import { ipKeyGenerator, rateLimit, type Options } from "express-rate-limit"
 
 const MINUTE_MS = 60 * 1000
+
+/**
+ * Rate limits count per visitor IP. clientIp is the IP our frontend saw (see originLock),
+ * which visitors can't fake; req.ip is the fallback when the lock is off (local development).
+ * ipKeyGenerator groups IPv6 addresses by network, so one machine can't rotate through many.
+ */
+function keyByClientIp(req: Request): string {
+    return ipKeyGenerator(req.clientIp ?? req.ip ?? "unknown")
+}
 
 /** Shared settings: standard `RateLimit` headers, and our usual error body for 429s. */
 function limiter(options: Partial<Options> & { message: string }) {
     return rateLimit({
         standardHeaders: "draft-8",
         legacyHeaders: false,
+        keyGenerator: keyByClientIp,
         ...options,
         message: { success: false, message: options.message },
     })
